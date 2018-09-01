@@ -1,0 +1,17 @@
+{% extends 'site_base.html' %}
+{% block title %}
+Products
+{% endblock %}
+{% block body %}
+  <h2>Products</h2>
+  <div class="row">
+    <div class="col-md-4"><b>Name</b></div>
+    <div class="col-md-1"><b>Price</b></div>
+  </div>
+{% for product in object_list %}
+  <div class="row">
+    <div class="col-md-4">{{ product.name }}</div>
+    <div class="col-md-1">{{ product.unit_price }}</div>
+  </div>
+{% endfor %}
+{% endblock %}

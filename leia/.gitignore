@@ -1,0 +1,9 @@
+*.pyc
+node_modules/
+dev.db
+site_media/
+static/dist/
+.DS_Store
+.babelrc
+.eslintrc.json
+tox.ini

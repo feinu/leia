@@ -1,0 +1,66 @@
+{% extends 'site_base.html' %}
+{% load bootstrap %}
+{% block title %}
+  {{ object.name }}
+{% endblock %}
+{% block body %}
+  <div class="row">
+    <div class="col-4"><b>{{ object.name }}</b>{{ object.email }}</div>
+    <div class="col-4"><b>Balance: R {{ balance }}</b></div>
+  </div>
+
+
+  <form method="post">{% csrf_token %}
+  {{ form|bootstrap }}
+  <button class="btn btn-primary" type="submit">New Charge</button>
+  </form>
+
+
+  <h4>Uninvoiced Charges: R {{ outstanding_amount }}</h4>
+{%   if outstanding_items %}
+  <div class="row">
+    <div class="col-md-2"><b>Date</b></div>
+    <div class="col-md-4"><b>Description</b></div>
+    <div class="col-md-1"><b>Quantity</b></div>
+    <div class="col-md-1"><b>Amount</b></div>
+  </div>
+{%     for item in outstanding_items %}
+  <div class="row">
+    <div class="col-md-2">{{ item.date }}</div>
+    <div class="col-md-4">{{ item.description }}</div>
+    <div class="col-md-1">{{ item.quantity }}</div>
+    <div class="col-md-1">{{ item.amount }}</div>
+  </div>
+{%     endfor %}
+  <button class="btn btn-primary" type="submit">Generate Invoice</button>
+{%   endif %}
+
+  <h4>Payments</h4>
+  <button class="btn btn-primary" type="submit">Log Payment</button>
+{%   if payments %}
+  <div class="row">
+    <div class="col-md-2"><b>Date</b></div>
+    <div class="col-md-1"><b>Amount</b></div>
+  </div>
+{%     for invoice in invoices %}
+  <div class="row">
+    <div class="col-md-2">{{ payment.date }}</div>
+    <div class="col-md-1">{{ payment.amount }}</div>
+  </div>
+{%     endfor %}
+{%   endif %}
+
+{%   if invoices %}
+  <h4>Invoices</h4>
+  <div class="row">
+    <div class="col-md-2"><b>Date</b></div>
+    <div class="col-md-1"><b>Download</b></div>
+  </div>
+{%     for invoice in invoices %}
+  <div class="row">
+    <div class="col-md-2">{{ invoice.date }}</div>
+    <div class="col-md-1">{{ invoice.download_link }}</div>
+  </div>
+{%     endfor %}
+{%   endif %}
+{% endblock %}
