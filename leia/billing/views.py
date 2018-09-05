@@ -1,9 +1,10 @@
 from django.urls import reverse_lazy
+from django.utils import timezone
 from django.views.generic import ListView, DetailView
 from django.views.generic.edit import CreateView, FormView
 
 from .models import Client, Product, LineItem
-from .forms import LineItemForm
+from .forms import InvoiceForm, LineItemForm, PaymentForm
 
 
 class ClientCreate(CreateView):
@@ -49,6 +50,13 @@ class ClientDetails(DetailView, FormView):
         context['balance'] = '0.00'
         context['outstanding_amount'] = sum([x['amount'] for x in outstanding])
         context['outstanding_items'] = outstanding
+        context['invoice_form'] = InvoiceForm(
+            initial={'client': self.object.pk})
+        context['payment_form'] = PaymentForm(
+            initial={
+                'date': timezone.now(),
+                'client': self.object,
+            })
         return context
 
     def form_valid(self, form):
@@ -67,6 +75,33 @@ class ClientDetails(DetailView, FormView):
         return super().form_valid(form)
 
 
+class PaymentCreate(FormView):
+    form_class = PaymentForm
+    template_name = 'billing/payment_create.html'
 
-# class NewCharge(FormView):
-#     form_class = None
+    def post(self, request):
+        print('post')
+        print(request.__dict__)
+        return super().post(self, request)
+
+    def get_success_url(self):
+        print('succesurl')
+        return self.object.client.get_absolute_url()
+
+    def form_valid(self, form):
+        print('form_valid')
+        amount = form.cleaned_data['amount']
+        date = form.cleaned_data['date']
+        self.object = form.cleaned_data['client'].new_payment(amount, date)
+        return super().form_valid(form)
+
+
+class InvoiceCreate(FormView):
+    form_class = InvoiceForm
+
+    def get_success_url(self):
+        return self.object.client.get_absolute_url()
+
+    def form_valid(self, form):
+        self.object = form.cleaned_data['client'].new_invoice()
+        return super().form_valid(form)

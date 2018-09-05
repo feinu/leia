@@ -32,11 +32,17 @@
     <div class="col-md-1">{{ item.amount }}</div>
   </div>
 {%     endfor %}
-  <button class="btn btn-primary" type="submit">Generate Invoice</button>
+  <form method="post">{% csrf_token %}
+    {{ invoice_form|bootstrap }}
+    <button class="btn btn-primary" formaction="{% url "invoicecreate" %}" type="submit">Generate Invoice</button>
+  </form>
 {%   endif %}
 
   <h4>Payments</h4>
-  <button class="btn btn-primary" type="submit">Log Payment</button>
+  <form method="post">{% csrf_token %}
+    {{ payment_form|bootstrap }}
+    <button class="btn btn-primary" formaction="{% url "paymentcreate" %}" type="submit">Record Payment</button>
+  </form>
 {%   if payments %}
   <div class="row">
     <div class="col-md-2"><b>Date</b></div>
