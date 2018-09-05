@@ -1,9 +1,9 @@
 from django.urls import reverse_lazy
 from django.utils import timezone
-from django.views.generic import ListView, DetailView
+from django.views.generic import ListView, DetailView, RedirectView
 from django.views.generic.edit import CreateView, FormView
 
-from .models import Client, Product, LineItem
+from .models import Client, Product, LineItem, Payment
 from .forms import InvoiceForm, LineItemForm, PaymentForm
 
 
@@ -46,13 +46,21 @@ class ClientDetails(DetailView, FormView):
             for item in LineItem.objects.filter(client=self.get_object(),
                                                 invoice=None)
         ]
+        payments = [
+            {
+                'date': payment.date,
+                'amount': payment.amount,
+            }
+            for payment in Payment.objects.filter(client=self.get_object())
+        ]
 
         context['balance'] = '0.00'
         context['outstanding_amount'] = sum([x['amount'] for x in outstanding])
         context['outstanding_items'] = outstanding
-        context['invoice_form'] = InvoiceForm(
+        context['payments'] = payments
+        context['invoice_form'] = kwargs.get('invoiceform') or InvoiceForm(
             initial={'client': self.object.pk})
-        context['payment_form'] = PaymentForm(
+        context['payment_form'] = kwargs.get('paymentform') or PaymentForm(
             initial={
                 'date': timezone.now(),
                 'client': self.object,

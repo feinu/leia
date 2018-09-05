@@ -16,6 +16,7 @@
   </form>
 
 
+  <br>
   <h4>Uninvoiced Charges: R {{ outstanding_amount }}</h4>
 {%   if outstanding_items %}
   <div class="row">
@@ -32,29 +33,32 @@
     <div class="col-md-1">{{ item.amount }}</div>
   </div>
 {%     endfor %}
+<br>
   <form method="post">{% csrf_token %}
     {{ invoice_form|bootstrap }}
     <button class="btn btn-primary" formaction="{% url "invoicecreate" %}" type="submit">Generate Invoice</button>
   </form>
 {%   endif %}
 
+<br>
   <h4>Payments</h4>
-  <form method="post">{% csrf_token %}
-    {{ payment_form|bootstrap }}
-    <button class="btn btn-primary" formaction="{% url "paymentcreate" %}" type="submit">Record Payment</button>
-  </form>
 {%   if payments %}
   <div class="row">
     <div class="col-md-2"><b>Date</b></div>
     <div class="col-md-1"><b>Amount</b></div>
   </div>
-{%     for invoice in invoices %}
+{%     for payment in payments %}
   <div class="row">
     <div class="col-md-2">{{ payment.date }}</div>
     <div class="col-md-1">{{ payment.amount }}</div>
   </div>
 {%     endfor %}
 {%   endif %}
+<br>
+  <form method="post">{% csrf_token %}
+    {{ payment_form|bootstrap }}
+    <button class="btn btn-primary" formaction="{% url "paymentcreate" %}" type="submit">Record Payment</button>
+  </form>
 
 {%   if invoices %}
   <h4>Invoices</h4>
