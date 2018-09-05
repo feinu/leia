@@ -54,7 +54,7 @@ class ClientDetails(DetailView, FormView):
             for payment in Payment.objects.filter(client=self.get_object())
         ]
 
-        context['balance'] = '0.00'
+        context['balance'] = self.object.balance()
         context['outstanding_amount'] = sum([x['amount'] for x in outstanding])
         context['outstanding_items'] = outstanding
         context['payments'] = payments
