@@ -1,9 +1,10 @@
+from django.contrib import messages
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.views.generic import ListView, DetailView, RedirectView
 from django.views.generic.edit import CreateView, FormView
 
-from .models import Client, Product, LineItem, Payment
+from .models import Client, Invoice, LineItem, Payment, Product
 from .forms import InvoiceForm, LineItemForm, PaymentForm
 
 
@@ -43,8 +44,9 @@ class ClientDetails(DetailView, FormView):
                 'quantity': item.quantity,
                 'amount': item.amount
             }
-            for item in LineItem.objects.filter(client=self.get_object(),
-                                                invoice=None)
+            for item in LineItem.objects.filter(
+                client=self.get_object()
+            ).filter(invoice=None)
         ]
         payments = [
             {
@@ -65,6 +67,9 @@ class ClientDetails(DetailView, FormView):
                 'date': timezone.now(),
                 'client': self.object,
             })
+        context['invoices'] = [
+            x.dict() for x in Invoice.objects.filter(client=self.object)
+        ]
         return context
 
     def form_valid(self, form):
@@ -89,7 +94,7 @@ class PaymentCreate(FormView):
 
     def post(self, request):
         print('post')
-        print(request.__dict__)
+        # print(request.__dict__)
         return super().post(self, request)
 
     def get_success_url(self):
@@ -103,13 +108,37 @@ class PaymentCreate(FormView):
         self.object = form.cleaned_data['client'].new_payment(amount, date)
         return super().form_valid(form)
 
+    def form_invalid(self, form):
+        print('form invalid')
+        # print(form.__dict__)
+        return super().form_invalid(form)
+
 
 class InvoiceCreate(FormView):
     form_class = InvoiceForm
+
+    def post(self, request):
+        print('invoicecreate post')
+        print(request.__dict__)
+        return super().post(self, request)
 
     def get_success_url(self):
         return self.object.client.get_absolute_url()
 
     def form_valid(self, form):
+        print('invoicecreate form valid')
         self.object = form.cleaned_data['client'].new_invoice()
+        if self.object is None:
+            messages.error(self.request, 'Invoice could not be created')
+        else:
+            messages.success(self.request, 'Invoice Created')
         return super().form_valid(form)
+
+
+class InvoiceDetails(DetailView):
+    model = Invoice
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['invoice'] = self.object.dict()
+        return context
